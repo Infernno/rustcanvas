@@ -26,23 +26,39 @@ impl RustCanvas {
         self.height
     }
 
-    pub fn set_pixel(&mut self, x: usize, y: usize, color: u32) {
-        assert!(x < self.width && y < self.height, "{x}, {y} out of bounds!");
-
-        let index = y * self.width + x;
-        self.pixels[index] = color;
+    pub fn xMax(&self) -> usize {
+        self.width - 1
     }
 
-    pub fn get_pixel(&self, x: usize, y: usize) -> Option<u32> {
-        if x < self.width && y < self.height {
-            let index = y * self.width + x;
-            return Some(self.pixels[index]);
+    pub fn yMax(&self) -> usize {
+        self.height - 1
+    }
+
+    pub fn centerX(&self) -> usize { self.xMax() / 2 }
+
+    pub fn centerY(&self) -> usize { self.yMax() / 2 }
+
+    pub fn set_pixel(&mut self, x: usize, y: usize, color: u32) {
+        let index = y * self.width + x;
+
+        if index < self.pixels.len() {
+            self.pixels[index] = color;
         } else {
-            None
+            panic!("Index {} is out of bounds: x = {}, y = {}, width = {}, height = {}", index, x, y, self.width, self.height)
         }
     }
 
-    pub fn save_to_ppm(&self, path: &str) -> io::Result<()> {
+    pub fn get_pixel(&self, x: usize, y: usize) -> Option<u32> {
+        let index = y * self.width + x;
+
+        if index < self.pixels.len() {
+            return Some(self.pixels[index]);
+        }
+
+        return None;
+    }
+
+    pub fn save_ppm(&self, path: &str) -> io::Result<()> {
         let mut file = File::create(path)?;
 
         // Write PPM header
@@ -70,10 +86,50 @@ impl RustCanvas {
         }
     }
 
-    pub fn fill_rect(&mut self, top: usize, left: usize, bottom: usize, right: usize, color: u32) {
-        for x in left..right {
-            for y in top..bottom {
+    pub fn fill_rect(
+        &mut self,
+        mut x1: usize,
+        mut x2: usize,
+        mut y1: usize,
+        mut y2: usize,
+        color: u32,
+    ) {
+        self.check_in_range(x1, y1);
+        self.check_in_range(x2, y2);
+
+        if x1 > x2 { swap(&mut x1, &mut x2) }
+        if y1 > y2 { swap(&mut y1, &mut y2) }
+
+        for x in x1..x2 {
+            for y in y1..y2 {
                 self.set_pixel(x, y, color)
+            }
+        }
+    }
+
+    pub fn fill_circle(
+        &mut self,
+        x: usize,
+        y: usize,
+        radius: usize,
+        color: u32,
+    ) {
+        let offset = radius / 2;
+
+        let x1 = x - offset;
+        let x2 = x + offset;
+
+        let y1 = y - offset;
+        let y2 = y + offset;
+
+        for a in x1..x2 {
+            for b in y1..y2 {
+                let distance = (a as i32 - x as i32) + (b as i32 - y as i32);
+                let r = (radius * radius) as i32;
+
+                if distance <= r {
+                    self.set_pixel(a, b, color)
+                }
             }
         }
     }
@@ -84,39 +140,47 @@ impl RustCanvas {
                    mut x2: usize,
                    mut y2: usize,
                    color: u32) {
+        self.check_in_range(x1, y1);
+        self.check_in_range(x2, y2);
+
         // y = k * x + c
 
         // y1 = k * x1 + c
         // y2 = k * x2 + c
 
-        // c = k * x1 - y1
-        // k = (y1 + y2) / (x2 + x1)
+        // c = y1 - k * x1
+        // k = (y2 - y1) / (x2 - x1)
 
-        if y1 > y2 { swap(&mut y1, &mut y2); }
-        if x1 > x2 { swap(&mut x1, &mut x2); }
+        let dx = (x2 as i32 - x1 as i32);
+        let dy = (y2 as i32 - y1 as i32);
 
-        // vertical line
-        if x1 + x2 == 0 {
+        if dx == 0 {
+            if y1 > y2 { swap(&mut y1, &mut y2) }
+
             for y in y1..y2 {
-                self.set_pixel(x1, y, color);
+                self.set_pixel(x1, y, color)
             }
         } else {
-            let k = (y1 + y2) as f32 / (x1 + x2) as f32;
-            let c = k * x1 as f32 - y1 as f32;
+            let k = dy as f32 / dx as f32;
+            let c = y1 as f32 - k * x1 as f32;
+
+            if x1 > x2 { swap(&mut x1, &mut x2) }
 
             for x in x1..x2 {
-                let y = k * x as f32 + c;
+                let y = (k * x as f32 + c);
+
                 self.set_pixel(x, y as usize, color)
             }
         }
     }
 
-    fn swap(a: &mut usize, b: &mut usize) {
-        if b > a {
-            let t = a;
+    fn check_in_range(&self, x: usize, y: usize) {
+        if x >= self.width {
+            panic!("x is out of range: {} >= {}", x, self.width)
+        }
 
-            //   a = b;
-            //    b = t;
+        if y >= self.height {
+            panic!("y is out of range: {} >= {}", y, self.height)
         }
     }
 }

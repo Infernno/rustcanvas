@@ -7,41 +7,38 @@ fn main() {
 
     canvas.clear(0x123456);
 
-    /*
-    canvas.fill_rect(
-        0, 0, 10, canvas.width(),
-        0xFFFFFF,
-    );
-
-    canvas.fill_rect(
-        10, 0, 20, canvas.width(),
-        0x0000FF,
-    );
-
-    canvas.fill_rect(
-        20, 0, 30, canvas.width(),
-        0xFF0000,
-    );
-     */
-
+    // Red cross
     canvas.line_to(
         0, 0,
-        canvas.width(), canvas.height(),
-        0xFF0000
+        canvas.xMax(), canvas.yMax(),
+        0xFF0000,
     );
 
     canvas.line_to(
-        canvas.width() / 2, 0,
-        50, 50,
+        canvas.xMax(), 0,
+        0, canvas.yMax(),
+        0xFF0000,
+    );
+
+    // Green horizontal & vertical lines
+    canvas.line_to(
+        canvas.centerX(), 0,
+        canvas.centerX(), canvas.yMax(),
+        0x00FF00,
+    );
+
+    canvas.line_to(
+        0, canvas.centerY(),
+        canvas.xMax(), canvas.centerY(),
+        0x00FF00,
+    );
+
+    canvas.fill_circle(
+        canvas.centerX(),
+        canvas.centerY(),
+        10,
         0xFFFFFF
     );
 
-
-    canvas.line_to(
-        canvas.width() / 2, 0,
-        canvas.width() / 2, canvas.height(),
-        0x00FF00
-    );
-
-    canvas.save_to_ppm("image.ppm").unwrap();
+    canvas.save_ppm("image.ppm").unwrap();
 }
