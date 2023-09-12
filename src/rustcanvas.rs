@@ -109,26 +109,28 @@ impl RustCanvas {
 
     pub fn fill_circle(
         &mut self,
-        x: usize,
-        y: usize,
+        centerX: usize,
+        centerY: usize,
         radius: usize,
         color: u32,
     ) {
-        let offset = radius / 2;
+        self.check_in_range(centerX, centerY);
 
-        let x1 = x - offset;
-        let x2 = x + offset;
+        let square_r = (radius * radius) as i32;
+        let half_r = radius;
 
-        let y1 = y - offset;
-        let y2 = y + offset;
+        let x1 = centerX - half_r;
+        let x2 = centerX + half_r;
 
-        for a in x1..x2 {
-            for b in y1..y2 {
-                let distance = (a as i32 - x as i32) + (b as i32 - y as i32);
-                let r = (radius * radius) as i32;
+        let y1 = centerY - half_r;
+        let y2 = centerY + half_r;
 
-                if distance <= r {
-                    self.set_pixel(a, b, color)
+        for x in x1..x2 {
+            for y in y1..y2 {
+                let distance = (x as i32 - centerX as i32).abs().pow(2) + (y as i32 - centerY as i32).abs().pow(2);
+
+                if distance < square_r {
+                    self.set_pixel(x, y, color)
                 }
             }
         }

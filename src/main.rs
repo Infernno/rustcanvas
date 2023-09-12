@@ -8,6 +8,7 @@ fn main() {
     canvas.clear(0x123456);
 
     // Red cross
+    /*
     canvas.line_to(
         0, 0,
         canvas.xMax(), canvas.yMax(),
@@ -32,6 +33,7 @@ fn main() {
         canvas.xMax(), canvas.centerY(),
         0x00FF00,
     );
+    */
 
     canvas.fill_circle(
         canvas.centerX(),
@@ -40,5 +42,5 @@ fn main() {
         0xFFFFFF
     );
 
-    canvas.save_ppm("image.ppm").unwrap();
+    canvas.save_ppm("result.ppm").unwrap();
 }
