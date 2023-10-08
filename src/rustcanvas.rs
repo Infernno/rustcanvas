@@ -195,8 +195,6 @@ impl RustCanvas {
                 for y in py..=ny {
                     if y >= 0 && y <= self.max_y_i32() {
                         self.set_pixel(x as usize, y as usize, color)
-                    } else {
-                        println!("Outside of range ({}, {}) (py = {}, ny = {}, x1 = {}, y1 = {}, x2 = {}, y2 = {})", x, y, py, ny, x1, y1, x2, y2)
                     }
                 }
             }

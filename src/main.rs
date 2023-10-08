@@ -1,5 +1,7 @@
 mod rustcanvas;
 
+use std::arch::aarch64::vrsqrte_f32;
+use std::f32::consts::PI;
 use rustcanvas::RustCanvas;
 
 fn main() {
@@ -7,58 +9,35 @@ fn main() {
 
     canvas.fill(0x12345678);
 
-    let x1 = 400;
-    let y1 = 100;
+    let cx = canvas.center_x() as i32;
+    let cy = canvas.center_y() as i32;
 
-    let x2 = 400;
-    let y2 = 400;
+    let x = cx;
+    let y = cy - 200;
 
-    let x3 = 700;
-    let y3 = 400;
-
-    canvas.draw_triangle(
-        x1, y1,
-        x2, y2,
-        x3, y3,
-        0xFFFFFFFF,
-    );
-
-    /*
     canvas.fill_circle(
-        x1, y1,
-        10,
-        0x00FF0000,
+        cx, cy,
+        15,
+        0x0000FF00,
     );
 
     canvas.fill_circle(
-        x2, y2,
-        10,
+        x, y,
+        30,
         0x00FF0000,
     );
+
+    let distance: f32 = f32::sqrt((x as f32 - cx as f32).powf(2.0) + (y as f32 - cy as f32).powf(2.0));
+    let angle: f32 = (f32::atan2(x as f32, y as f32)) + 0.0;
+
+    let nx: i32 = (distance.round() * f32::cos(angle).round()) as i32 + cx;
+    let ny: i32 = (distance.round() * f32::sin(angle).round()) as i32 + cy;
 
     canvas.fill_circle(
-        x3, y3,
-        10,
+        nx, ny,
+        30,
         0x00FF0000,
     );
-
-    canvas.line_to(
-        x1, y1,
-        x3, y3,
-        0x00FF0000,
-    );
-    canvas.line_to(
-        x1, y1,
-        x2, y2,
-        0x00FF0000,
-    );
-
-    canvas.line_to(
-        x2, y2,
-        x3, y3,
-        0x00FF0000,
-    );
-     */
 
     canvas.save_ppm("result.ppm").unwrap();
 }
